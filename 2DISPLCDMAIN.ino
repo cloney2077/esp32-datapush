@@ -26,9 +26,11 @@ extern const unsigned char* const bitmapArray[] PROGMEM; //Art Index array
 unsigned long previous = 0;
 const long interval = 2000;
 
+/* OLED drift variables
 int offsetY =0;
 int offsetX =0;
 unsigned long glide =0;
+*/
 
 unsigned long arttimer =0;
 int artint = 0;
@@ -169,7 +171,7 @@ void art(unsigned const char* nextArt){
   display.display();
 }
 
-///THE art array
+///THE art pointer array
 const unsigned char* const bitmapArray[] PROGMEM = {    
   art1, art2, art3
 };
