@@ -3,6 +3,7 @@
 #include <Adafruit_SSD1306.h>
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
+#include <secrets.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
