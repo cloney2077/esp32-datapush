@@ -1,0 +1,5 @@
+LiquidCrystal_I2C //Frank de Brabander
+DHT sensor library //Adafruit
+Adafruit GFX Library //For OLED //Adafruit
+
+All required dependencies will be auto installed if Arduino IDE platform is used;
