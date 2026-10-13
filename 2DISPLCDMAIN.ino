@@ -168,9 +168,12 @@ void art(unsigned const char* nextArt){
   display.display();
 }
 
-const unsigned char* const bitmapArray[] PROGMEM = {    ///THE art array
+///THE art array
+const unsigned char* const bitmapArray[] PROGMEM = {    
   art1, art2, art3
 };
+
+//ART BITMAPS
 
 const unsigned char art1 [] PROGMEM = {
 	0xff, 0xff, 0xff, 0x00, 0x10, 0xfc, 0x16, 0x48, 0x80, 0x00, 0x21, 0x8c, 0x10, 0x3f, 0xff, 0xff, 
