@@ -9,7 +9,10 @@
 #define SCREEN_HEIGHT 64
 #define OLED_RESET  -1
 #define BLUEPIN 2  //Cosmetic Purposes only;
-unsigned long bluecounter =0;
+unsigned long bluecounter =0; //Cosmetic Purposes Only
+
+float temp = 0;
+float humid = 0;
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -28,7 +31,7 @@ extern const unsigned char* const bitmapArray[] PROGMEM; //Art Index array
 unsigned long previous = 0;
 const long interval = 2000;
 
-/* OLED drift variables
+/* OLED drift (antiburn-in) variables
 int offsetY =0;
 int offsetX =0;
 unsigned long glide =0;
@@ -37,13 +40,19 @@ unsigned long glide =0;
 unsigned long arttimer =0;
 int artint = 0;
 
+//PROTOTYPE FUNCTIONS;
+
 void art(unsigned const char* nextArt);
+void printing(); //Prints to the Displays;
+void ifnan();
+void antiburnin(); //Register if you are using OLED;
 
 void setup(){
   Serial.begin(115200);
   Serial.println(F("Initializing"));
 
-  dht.begin();
+  dht.begin(); //Starting up the DHT22;
+
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)){
     Serial.println(F("Allocation Failed"));
     for(;;);
@@ -69,37 +78,50 @@ void setup(){
   delay(5000);
 }
 
+
+///SETUP ENDS;
+
+
 void loop(){
 
   unsigned long current = millis();
 
-  if(current - previous >= interval){
+  if(current - previous >= interval){ //2 Second Non Blocking Function;
 
     previous = current;  
-    float temp = dht.readTemperature();
-    float humid = dht.readHumidity();
+    temp = dht.readTemperature();
+    humid = dht.readHumidity();
 
-    if (isnan(humid) || isnan(temp)) {
+    ifnan();
 
-			lcd.clear();
-			lcd.home();
-			lcd.print("Sensor");
-			lcd.setCursor(0, 1);
-			lcd.print("ERROR");
+		printing();
 
-      display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(SSD1306_WHITE);
-      display.setCursor(0,20);
-      display.println(F("Sensor"));
-      display.println(F("ERROR"));
-      display.display();
+		if(millis()-bluecounter>10000){ ///Purely Cosmetic;
+			bluecounter = millis();
+			digitalWrite(BLUEPIN, HIGH);
+		}
+		
+		void antiburnin();
+		
+		if(millis()-arttimer > 21000){
+			arttimer = millis();
+			unsigned const char* arttemp = bitmapArray[artint];
+			art(arttemp);
+			artint++;
+			if(artint == 3){
+				artint=0;
+			}
+		}
+  }
+}
 
-      Serial.println(F("Error"));
-     
-      return;
-    }
 
+///;;;;;;;;LOOP FUNCTION ENDS;;;;;;;;
+
+///DECLARED FUNCTIONS;;;;;;;;
+
+
+void printing(){
 		/*OLED
     display.clearDisplay();
     display.setTextSize(1);
@@ -140,13 +162,39 @@ void loop(){
     Serial.println(F("Humidity: "));
     Serial.println(humid);
     Serial.println();
+}
 
-		if(millis()-bluecounter>10000){
-			bluecounter = millis();
-			digitalWrite(BLUEPIN, HIGH);
-		}
-		
-		/* OLED ANTI BURN IN
+void art(unsigned const char* nextArt){
+	display.clearDisplay();
+  display.drawBitmap(0, 0, nextArt, 128, 64, WHITE);
+  display.display();
+}
+
+void ifnan(){
+	if (isnan(humid) || isnan(temp)) {
+
+			lcd.clear();
+			lcd.home();
+			lcd.print("Sensor");
+			lcd.setCursor(0, 1);
+			lcd.print("ERROR");
+
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(0,20);
+      display.println(F("Sensor"));
+      display.println(F("ERROR"));
+      display.display();
+
+      Serial.println(F("Error"));
+     
+      return;
+    }
+}
+
+void antiburnin(){
+	/* OLED ANTI BURN IN
 		if(millis()-glide > 15000){ 
 			glide = millis();
 			offsetY++;
@@ -159,31 +207,17 @@ void loop(){
 			}
 		}
 		*/
-
-		if(millis()-arttimer > 21000){
-			arttimer = millis();
-			unsigned const char* arttemp = bitmapArray[artint];
-			art(arttemp);
-			artint++;
-			if(artint == 3){
-				artint=0;
-			}
-		}
-  }
 }
 
-void art(unsigned const char* nextArt){
-	display.clearDisplay();
-  display.drawBitmap(0, 0, nextArt, 128, 64, WHITE);
-  display.display();
-}
+
 
 ///THE art pointer array
 const unsigned char* const bitmapArray[] PROGMEM = {    
   art1, art2, art3
 };
 
-//ART BITMAPS
+
+//;;;;;;;;;;;;;;;;;;ART BITMAPS;;;;;;;;;;;;;;;;;;;;;;;;;
 
 const unsigned char art1 [] PROGMEM = {
 	0xff, 0xff, 0xff, 0x00, 0x10, 0xfc, 0x16, 0x48, 0x80, 0x00, 0x21, 0x8c, 0x10, 0x3f, 0xff, 0xff, 
