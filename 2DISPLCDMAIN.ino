@@ -3,13 +3,14 @@
 #include <Adafruit_SSD1306.h>
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
-#include <credentials.h>
+#include "credentials.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET  -1
 #define BLUEPIN 2  //Cosmetic Purposes only;
 unsigned long bluecounter =0; //Cosmetic Purposes Only
+int dispcounter = 0;
 
 float temp = 0;
 float humid = 0;
@@ -43,9 +44,13 @@ int artint = 0;
 //PROTOTYPE FUNCTIONS;
 
 void art(unsigned const char* nextArt);
-void printing(); //Prints to the Displays;
+void tstat(); //Prints physical status to the Displays;
+void wstat(); //Prints wifi status to the displays;
 void ifnan();
 void antiburnin(); //Register if you are using OLED;
+
+
+///;;;;;;SETUP;;;;;;;;;
 
 void setup(){
   Serial.begin(115200);
@@ -86,7 +91,7 @@ void loop(){
 
   unsigned long current = millis();
 
-  if(current - previous >= interval){ //2 Second Non Blocking Function;
+  if(current - previous >= interval){     //2 Second, Non Blocking Function;
 
     previous = current;  
     temp = dht.readTemperature();
@@ -94,14 +99,21 @@ void loop(){
 
     ifnan();
 
-		printing();
-
+		if(dispcounter == 0){
+			tstat(); //Display Physical Stats;
+			dispcounter =1;
+		}
+		else{
+			wstat(); //Display Wifi Stats;
+			dispcounter = 0;
+		}
+		
 		if(millis()-bluecounter>10000){ ///Purely Cosmetic;
 			bluecounter = millis();
 			digitalWrite(BLUEPIN, HIGH);
 		}
 		
-		void antiburnin();
+		antiburnin();
 		
 		if(millis()-arttimer > 21000){
 			arttimer = millis();
@@ -121,7 +133,7 @@ void loop(){
 ///DECLARED FUNCTIONS;;;;;;;;
 
 
-void printing(){
+void tstat(){
 		/*OLED
     display.clearDisplay();
     display.setTextSize(1);
@@ -162,6 +174,10 @@ void printing(){
     Serial.println(F("Humidity: "));
     Serial.println(humid);
     Serial.println();
+}
+
+void wstat(){
+	//Fill in later;
 }
 
 void art(unsigned const char* nextArt){
