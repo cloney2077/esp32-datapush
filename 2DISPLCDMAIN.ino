@@ -8,6 +8,8 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET  -1
+#define BLUEPIN 2  //Cosmetic Purposes only;
+unsigned long bluecounter =0;
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -138,6 +140,11 @@ void loop(){
     Serial.println(F("Humidity: "));
     Serial.println(humid);
     Serial.println();
+
+		if(millis()-bluecounter>10000){
+			bluecounter = millis();
+			digitalWrite(BLUEPIN, HIGH);
+		}
 		
 		/* OLED ANTI BURN IN
 		if(millis()-glide > 15000){ 
