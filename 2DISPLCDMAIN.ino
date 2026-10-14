@@ -8,8 +8,7 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET  -1
-#define BLUEPIN 2  //Cosmetic Purposes only;
-unsigned long bluecounter =0; //Cosmetic Purposes Only
+unsigned long artcounter =0;
 int dispcounter = 0;
 
 float temp = 0;
@@ -58,10 +57,14 @@ void setup(){
 
   dht.begin(); //Starting up the DHT22;
 
+	display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+
+	/*
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)){
     Serial.println(F("Allocation Failed"));
     for(;;);
   }
+	*/
 
 	lcd.init();
 	lcd.backlight();
@@ -108,12 +111,12 @@ void loop(){
 			dispcounter = 0;
 		}
 		
-		if(millis()-bluecounter>10000){ ///Purely Cosmetic;
-			bluecounter = millis();
-			digitalWrite(BLUEPIN, HIGH);
+		if(millis()-artcounter>10000){ 
+			artcounter = millis();
+			display.ssd1306_command(SSD1306_DISPLAYOFF);
 		}
 		
-		antiburnin();
+		antiburnin(); //OLED Anti Burn-In Strategy;
 		
 		if(millis()-arttimer > 21000){
 			arttimer = millis();
@@ -129,6 +132,7 @@ void loop(){
 
 
 ///;;;;;;;;LOOP FUNCTION ENDS;;;;;;;;
+
 
 ///DECLARED FUNCTIONS;;;;;;;;
 
@@ -158,6 +162,7 @@ void tstat(){
 
 		//LCD
 		lcd.clear();
+		lcd.home();
     lcd.print(F("Temp: "));
     lcd.print(temp,1);
     lcd.print((char)223);
@@ -177,10 +182,15 @@ void tstat(){
 }
 
 void wstat(){
-	//Fill in later;
+	lcd.clear();
+	lcd.home();
+	lcd.print(F("Wifi Status:"));
+	lcd.setCursor(0, 1);
+	lcd.print(F("Not Connected!"));
 }
 
 void art(unsigned const char* nextArt){
+	display.ssd1306_command(SSD1306_DISPLAYON);
 	display.clearDisplay();
   display.drawBitmap(0, 0, nextArt, 128, 64, WHITE);
   display.display();
@@ -226,12 +236,9 @@ void antiburnin(){
 }
 
 
-
 ///THE art pointer array
-const unsigned char* const bitmapArray[] PROGMEM = {    
-  art1, art2, art3
-};
 
+const unsigned char* const bitmapArray[] PROGMEM = { art1, art2, art3 };
 
 //;;;;;;;;;;;;;;;;;;ART BITMAPS;;;;;;;;;;;;;;;;;;;;;;;;;
 
