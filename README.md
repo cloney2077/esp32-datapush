@@ -1,3 +1,5 @@
+2DISPLCDMAIN.ino will be referred as the codebase.
+
 The codebase assumes two displays; an OLED at address of 0x3C; and an LCD display at 0x27 (default ones);
 
 The OLED merely acts as a Artwork Collage player and may be removed if required;
