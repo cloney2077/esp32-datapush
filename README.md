@@ -10,6 +10,8 @@ ex,
 
 https://files.catbox.moe/9086zl.jpg
 
+https://files.catbox.moe/zarz9r.jpg
+
 Data push via wifi to a dashboard will soon be implemented;
 
 Which will require full stack web development 😬; which I am not really keen to dedicate time for at present. 
