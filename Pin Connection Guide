@@ -32,3 +32,12 @@ SDA: 21
 SCL: 22
 
 ----------------------------------
+LDR (Photoresistor)
+
++: 3v3
+
+-: GPIO 34
+
+10k ohm resistor: From - into GND
+
+----------------------------------
