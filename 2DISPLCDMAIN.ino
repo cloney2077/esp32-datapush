@@ -11,8 +11,13 @@
 unsigned long artcounter =0;
 int dispcounter = 0;
 
+int lrdpin = 34;
+int lut = 0;
+
 float temp = 0;
 float humid = 0;
+
+bool lutstatus = true;
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -47,6 +52,7 @@ void tstat(); //Prints physical status to the Displays;
 void wstat(); //Prints wifi status to the displays;
 void ifnan();
 void antiburnin(); //Register if you are using OLED;
+void lutstat();
 
 
 ///;;;;;;SETUP;;;;;;;;;
@@ -58,6 +64,9 @@ void setup(){
   dht.begin(); //Starting up the DHT22;
 
 	display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+
+	pinMode(lrdpin, INPUT);
+	analogSetAttenuation(ADC_11db);
 
 	/*
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)){
@@ -99,18 +108,30 @@ void loop(){
     previous = current;  
     temp = dht.readTemperature();
     humid = dht.readHumidity();
-
+		
+		if (isnan(humid) || isnan(temp)) {
     ifnan();
-
-		if(dispcounter == 0){
-			tstat(); //Display Physical Stats;
-			dispcounter =1;
-		}
-		else{
-			wstat(); //Display Wifi Stats;
-			dispcounter = 0;
 		}
 		
+		switch(dispcounter){
+			case 0:
+				tstat();
+				break;
+
+			case 1:
+				wstat();
+				break;
+
+			case 2:
+				lutstat();	
+				break;
+
+		}
+
+		lut = analogRead(lrdpin);
+
+		dispcounter = ((dispcounter + 1) % 3);
+
 		if(millis()-artcounter>10000){ 
 			artcounter = millis();
 			display.ssd1306_command(SSD1306_DISPLAYOFF);
@@ -127,6 +148,14 @@ void loop(){
 				artint=0;
 			}
 		}
+		if(lut < 600 && lutstatus == true){
+			lutstatus = false;
+			lcd.noBacklight();
+		}
+		if(lut > 1400 && lutstatus == false){
+			lutstatus = true;
+			lcd.backlight();
+		}
   }
 }
 
@@ -136,6 +165,15 @@ void loop(){
 
 ///DECLARED FUNCTIONS;;;;;;;;
 
+void lutstat(){
+	lcd.clear();
+	lcd.print(F("Room Light Value"));
+	lcd.setCursor(0,1);
+	lcd.print(F("= "));
+	lcd.print(lut);
+	Serial.println("LUT:");
+	Serial.println(lut);
+}
 
 void tstat(){
 		/*OLED
