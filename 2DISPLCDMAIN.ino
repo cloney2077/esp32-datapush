@@ -23,7 +23,7 @@ int lut = 0;
 float temp = 0;
 float humid = 0;
 
-bool lutstatus = true;
+bool lcdstatus = true;
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -42,11 +42,10 @@ extern const unsigned char* const bitmapArray[] PROGMEM; //Art Index array
 unsigned long previous = 0;
 const long interval = 2000;
 
-/* OLED drift (antiburn-in) variables
+/* OLED drift (antiburn-in) variables */
 int offsetY =0;
 int offsetX =0;
 unsigned long glide =0;
-*/
 
 unsigned long arttimer =0;
 int artint = 0;
@@ -154,12 +153,12 @@ void loop(){
 				artint=0;
 			}
 		}
-		if(lut < 600 && lutstatus == true){
-			lutstatus = false;
+		if(lut < 600 && lcdstatus == true){
+			lcdstatus = false;
 			lcd.noBacklight();
 		}
-		if(lut > 1400 && lutstatus == false){
-			lutstatus = true;
+		if(lut > 1400 && lcdstatus == false){
+			lcdstatus = true;
 			lcd.backlight();
 		}
   }
@@ -172,17 +171,30 @@ void loop(){
 ///DECLARED FUNCTIONS;;;;;;;;
 
 void lutstat(){
+	if(lcdstatus== false){
+		display.clearDisplay();
+		display.setCursor(0 , 15);
+    display.setTextSize(2);
+    display.print(F("Light: "));
+		display.setCursor(0, 42);
+		display.print("= ");
+    display.print(lut,1);
+		display.print(" / 4095");
+		display.display();
+	}
 	lcd.clear();
 	lcd.print(F("Room Light Value"));
 	lcd.setCursor(0,1);
 	lcd.print(F("= "));
 	lcd.print(lut);
+	lcd.print(" / 4095");
+
 	Serial.println("LUT:");
 	Serial.println(lut);
 }
 
 void tstat(){
-		/*OLED
+		if(lcdstatus ==  false){
     display.clearDisplay();
     display.setTextSize(1);
     display.setCursor(offsetX , 0+ offsetY);
@@ -202,7 +214,7 @@ void tstat(){
     display.print(F("%"));
 
     display.display();
-		*/
+		}
 
 		//LCD
 		lcd.clear();
