@@ -10,6 +10,15 @@
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
 #include "credentials.h"
+#include <WiFi.h>
+#include "time.h"
+#include <WiFiMulti.h> ///WILL ADD LATER;
+
+WiFiMulti wifiMulti;
+
+const char* ntpserver = "pool.ntp.org";
+const long timeoffset = ((5.5)*3600);
+const int daylighttimings = 0;
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -24,6 +33,14 @@ float temp = 0;
 float humid = 0;
 
 bool lcdstatus = true;
+bool connectionstat = false;
+bool timestat = false;
+
+int myHour = 0;      
+int myMinute = 0;      
+int mySecond = 0;
+int day = 0;
+int month = 0;	
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -36,6 +53,7 @@ DHT dht(DHTPIN,DHTTYPE);
 extern const unsigned char art1[] PROGMEM;
 extern const unsigned char art2[] PROGMEM;
 extern const unsigned char art3[] PROGMEM;
+extern byte heart[8];
 
 extern const unsigned char* const bitmapArray[] PROGMEM; //Art Index array
 
@@ -53,12 +71,13 @@ int artint = 0;
 //PROTOTYPE FUNCTIONS;
 
 void art(unsigned const char* nextArt);
+void home();
 void tstat(); //Prints physical status to the Displays;
 void wstat(); //Prints wifi status to the displays;
 void ifnan();
 void antiburnin(); //Register if you are using OLED;
 void lutstat();
-
+void wificonnect();
 
 ///;;;;;;SETUP;;;;;;;;;
 
@@ -82,6 +101,9 @@ void setup(){
 
 	lcd.init();
 	lcd.backlight();
+
+	lcd.createChar(0, heart);
+
 	lcd.clear();
 	lcd.home();
 	lcd.print("Environment");
@@ -97,6 +119,9 @@ void setup(){
   display.clearDisplay();
   display.drawBitmap(0, 0, art3, 128, 64, WHITE);
   display.display();
+	
+	wificonnect();
+
   delay(5000);
 }
 
@@ -117,17 +142,33 @@ void loop(){
 		if (isnan(humid) || isnan(temp)) {
     ifnan();
 		}
+
+		if(timestat == true){
+			struct tm timeinfo;
+			if (getLocalTime(&timeinfo)) {
+			 myHour   = timeinfo.tm_hour;          
+			 myMinute = timeinfo.tm_min;            
+			 mySecond = timeinfo.tm_sec;   
+			 day = timeinfo.tm_mday;
+			 month = timeinfo.tm_mon + 1;
+			}
+		}
+		
 		
 		switch(dispcounter){
 			case 0:
+			home();
+			break;
+
+			case 1:
 				tstat();
 				break;
 
-			case 1:
+			case 2:
 				wstat();
 				break;
 
-			case 2:
+			case 3:
 				lutstat();	
 				break;
 
@@ -135,7 +176,7 @@ void loop(){
 
 		lut = analogRead(lrdpin);
 
-		dispcounter = ((dispcounter + 1) % 3);
+		dispcounter = ((dispcounter + 1) % 4);
 
 		if(millis()-artcounter>10000){ 
 			artcounter = millis();
@@ -170,6 +211,63 @@ void loop(){
 
 ///DECLARED FUNCTIONS;;;;;;;;
 
+void home(){
+	display.clearDisplay();
+	display.setCursor(0, 23);
+	display.setTextSize(2);
+	lcd.print(myHour);
+	lcd.print(":");
+	lcd.print(myMinute);
+	display.display();
+
+
+	lcd.clear();
+	lcd.print(" ");
+	lcd.print(myHour);
+	lcd.print(":");
+	lcd.print(myMinute);
+	lcd.print("     ");
+	lcd.print(temp,1);
+  lcd.print((char)223);
+  lcd.print(F("C"));
+
+	lcd.setCursor(0, 1);
+
+	if(myHour < 4){
+		lcd.print("-SLEEP! *_* ");
+	}
+	if(myHour > 4 && myHour < 12){
+		lcd.print("Good Morning :)");
+	}
+	if(myHour > 12 && myHour < 16){
+		lcd.print("Good Afternoon ");
+		lcd.write(byte(0));
+	}
+	if(myHour > 16){
+		lcd.print("Good Evening");
+	}
+}
+
+void wificonnect(){
+	unsigned long a = millis();
+	Serial.println("Attempting to connect to WIFI...");
+	WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
+	while(WiFi.status() != WL_CONNECTED){
+		Serial.println("Not Connected");
+		if(millis()-a >10000){
+			Serial.println("WIFI TIMED OUT");
+			break;
+		}
+		if(WiFi.status() == WL_CONNECTED){
+			connectionstat = true;
+			configTime(timeoffset, daylighttimings, ntpserver);
+			timestat = true;
+			Serial.println("Connected!");
+			break;
+		}
+	}
+}
+
 void lutstat(){
 	if(lcdstatus== false){
 		display.clearDisplay();
@@ -181,6 +279,7 @@ void lutstat(){
     display.print(lut,1);
 		display.print(" / 4095");
 		display.display();
+		void antiburnin();
 	}
 	lcd.clear();
 	lcd.print(F("Room Light Value"));
@@ -214,6 +313,8 @@ void tstat(){
     display.print(F("%"));
 
     display.display();
+
+		void antiburnin();
 		}
 
 		//LCD
@@ -242,7 +343,12 @@ void wstat(){
 	lcd.home();
 	lcd.print(F("Wifi Status:"));
 	lcd.setCursor(0, 1);
-	lcd.print(F("Not Connected!"));
+	if(WiFi.status() == WL_CONNECTED){
+		lcd.print(F("Connected! (NT)"));
+	}
+	else{
+		lcd.print(F("Not Connected!"));
+	}
 }
 
 void art(unsigned const char* nextArt){
@@ -276,7 +382,7 @@ void ifnan(){
 }
 
 void antiburnin(){
-	/* OLED ANTI BURN IN
+	// OLED ANTI BURN IN
 		if(millis()-glide > 15000){ 
 			glide = millis();
 			offsetY++;
@@ -288,8 +394,19 @@ void antiburnin(){
 				offsetX=0;
 			}
 		}
-		*/
+		
 }
+
+byte heart[8] = {
+  0b00000,
+  0b01010,
+  0b11111,
+  0b11111,
+  0b01110,
+  0b00100,
+  0b00000,
+  0b00000
+};
 
 
 ///THE art pointer array
