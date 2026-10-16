@@ -110,6 +110,8 @@ void setup(){
 	lcd.setCursor(0, 1);
 	lcd.print("Loading...");
 
+	wificonnect();
+
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
@@ -119,8 +121,6 @@ void setup(){
   display.clearDisplay();
   display.drawBitmap(0, 0, art3, 128, 64, WHITE);
   display.display();
-	
-	wificonnect();
 
   delay(5000);
 }
@@ -156,16 +156,16 @@ void loop(){
 		
 		
 		switch(dispcounter){
-			case 0:
-			home();
-			break;
+				case 0:
+				home();
+				break;
 
 			case 1:
-				tstat();
+				wstat();
 				break;
 
 			case 2:
-				wstat();
+				tstat();
 				break;
 
 			case 3:
@@ -180,13 +180,16 @@ void loop(){
 
 		if(millis()-artcounter>10000){ 
 			artcounter = millis();
-			display.ssd1306_command(SSD1306_DISPLAYOFF);
+			//display.ssd1306_command(SSD1306_DISPLAYOFF);
 		}
 		
 		antiburnin(); //OLED Anti Burn-In Strategy;
 		
 		if(millis()-arttimer > 21000){
 			arttimer = millis();
+			if(lcdstatus == false){
+				return;
+			}
 			unsigned const char* arttemp = bitmapArray[artint];
 			art(arttemp);
 			artint++;
@@ -212,21 +215,44 @@ void loop(){
 ///DECLARED FUNCTIONS;;;;;;;;
 
 void home(){
+
+	int displayHour = myHour % 12;
+  if (displayHour == 0) displayHour = 12;
+
 	display.clearDisplay();
-	display.setCursor(0, 23);
+	display.setCursor(16, 24);
 	display.setTextSize(2);
-	lcd.print(myHour);
-	lcd.print(":");
-	lcd.print(myMinute);
+	if(displayHour<10){
+		display.print("0");
+	}
+	display.print(displayHour);
+	display.print(":");
+	if (myMinute < 10) display.print("0");
+	display.print(myMinute);
+	if(myHour<12){
+		display.print(" AM");
+	}
+	else{
+		display.print(" PM");
+	}
 	display.display();
 
 
 	lcd.clear();
-	lcd.print(" ");
-	lcd.print(myHour);
+	if(displayHour<10){
+		lcd.print("0");
+	}
+	lcd.print(displayHour);
 	lcd.print(":");
+	if (myMinute < 10) lcd.print("0");
 	lcd.print(myMinute);
-	lcd.print("     ");
+	if(myHour<12){
+		display.print(" AM");
+	}
+	else{
+		display.print(" PM");
+	}
+	lcd.print("  ");
 	lcd.print(temp,1);
   lcd.print((char)223);
   lcd.print(F("C"));
@@ -271,15 +297,14 @@ void wificonnect(){
 void lutstat(){
 	if(lcdstatus== false){
 		display.clearDisplay();
-		display.setCursor(0 , 15);
+		display.setCursor(0 , 10);
     display.setTextSize(2);
     display.print(F("Light: "));
-		display.setCursor(0, 42);
+		display.setCursor(0, 40);
 		display.print("= ");
     display.print(lut,1);
-		display.print(" / 4095");
+		display.print("/4095");
 		display.display();
-		void antiburnin();
 	}
 	lcd.clear();
 	lcd.print(F("Room Light Value"));
@@ -314,7 +339,7 @@ void tstat(){
 
     display.display();
 
-		void antiburnin();
+		antiburnin();
 		}
 
 		//LCD
@@ -352,7 +377,7 @@ void wstat(){
 }
 
 void art(unsigned const char* nextArt){
-	display.ssd1306_command(SSD1306_DISPLAYON);
+	//display.ssd1306_command(SSD1306_DISPLAYON);
 	display.clearDisplay();
   display.drawBitmap(0, 0, nextArt, 128, 64, WHITE);
   display.display();
