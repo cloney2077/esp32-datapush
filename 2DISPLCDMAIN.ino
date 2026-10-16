@@ -262,10 +262,10 @@ void home(){
 	if(myHour < 4){
 		lcd.print("-SLEEP! *_* ");
 	}
-	if(myHour > 4 && myHour < 12){
+	if(myHour >= 4 && myHour < 12){
 		lcd.print("Good Morning :)");
 	}
-	if(myHour > 12 && myHour < 16){
+	if(myHour > 12 && myHour <= 16){
 		lcd.print("Good Afternoon ");
 		lcd.write(byte(0));
 	}
@@ -364,9 +364,11 @@ void tstat(){
 }
 
 void wstat(){
+	float a = (millis()/3600000.0);
 	lcd.clear();
 	lcd.home();
-	lcd.print(F("Wifi Status:"));
+	lcd.print(F("WiFi:  UPTME "));
+	lcd.print(a,1);
 	lcd.setCursor(0, 1);
 	if(WiFi.status() == WL_CONNECTED){
 		lcd.print(F("Connected! (NT)"));

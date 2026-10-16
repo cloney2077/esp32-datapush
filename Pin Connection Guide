@@ -40,4 +40,7 @@ LDR (Photoresistor)
 
 10k ohm resistor: From - into GND
 
+GPIO 34 must be sandwiched between -ve and GND;
+To obtain smooth analog values;
+
 ----------------------------------
