@@ -247,10 +247,10 @@ void home(){
 	if (myMinute < 10) lcd.print("0");
 	lcd.print(myMinute);
 	if(myHour<12){
-		display.print(" AM");
+		lcd.print(" AM");
 	}
 	else{
-		display.print(" PM");
+		lcd.print(" PM");
 	}
 	lcd.print("  ");
 	lcd.print(temp,1);
