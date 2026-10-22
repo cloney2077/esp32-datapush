@@ -65,6 +65,9 @@ int offsetY =0;
 int offsetX =0;
 unsigned long glide =0;
 
+int hoffsetY =0;
+int hoffsetX =0;
+
 unsigned long arttimer =0;
 int artint = 0;
 
@@ -78,6 +81,7 @@ void ifnan();
 void antiburnin(); //Register if you are using OLED;
 void lutstat();
 void wificonnect();
+void homeantiburnin();
 
 ///;;;;;;SETUP;;;;;;;;;
 
@@ -220,7 +224,7 @@ void home(){
   if (displayHour == 0) displayHour = 12;
 
 	display.clearDisplay();
-	display.setCursor(16, 24);
+	display.setCursor(hoffsetX, hoffsetY);
 	display.setTextSize(2);
 	if(displayHour<10){
 		display.print("0");
@@ -236,6 +240,7 @@ void home(){
 		display.print(" PM");
 	}
 	display.display();
+	homeantiburnin();
 
 
 	lcd.clear();
@@ -367,8 +372,9 @@ void wstat(){
 	float a = (millis()/3600000.0);
 	lcd.clear();
 	lcd.home();
-	lcd.print(F("WiFi:  UPTME "));
+	lcd.print(F("WiFi: TME:"));
 	lcd.print(a,1);
+	lcd.print("h");
 	lcd.setCursor(0, 1);
 	if(WiFi.status() == WL_CONNECTED){
 		lcd.print(F("Connected! (NT)"));
@@ -422,6 +428,13 @@ void antiburnin(){
 			}
 		}
 		
+}
+
+void homeantiburnin(){
+		hoffsetX++;
+		hoffsetY++;
+		if(hoffsetX >= 32){hoffsetX=0;}
+		if(hoffsetY >= 48){hoffsetY=0;}
 }
 
 byte heart[8] = {
