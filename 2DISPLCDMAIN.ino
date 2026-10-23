@@ -1,7 +1,9 @@
-//---------------------------------------------------
+/*
+--------------------------------------------------------
 //Some Code blocks are Deactivated.
-//Not removed, because I may use them later if needed;
-//---------------------------------------------------
+//Not removed: because I may use them later if needed;
+--------------------------------------------------------
+*/
 
 
 #include <Wire.h>
@@ -9,12 +11,12 @@
 #include <Adafruit_SSD1306.h>
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
-#include "credentials.h"
+#include "credentials.h" //hosts wifi ssids and passwords
 #include <WiFi.h>
 #include "time.h"
-#include <WiFiMulti.h> ///WILL ADD LATER;
 
-WiFiMulti wifiMulti;
+#include <WiFiMulti.h> ///WILL ADD LATER;
+WiFiMulti wifiMulti; 
 
 const char* ntpserver = "pool.ntp.org";
 const long timeoffset = ((5.5)*3600);
@@ -96,7 +98,8 @@ void setup(){
 	pinMode(lrdpin, INPUT);
 	analogSetAttenuation(ADC_11db);
 
-	/*
+	/* To allow on field removal of OLED screen if required;
+
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)){
     Serial.println(F("Allocation Failed"));
     for(;;);
@@ -126,7 +129,7 @@ void setup(){
   display.drawBitmap(0, 0, art3, 128, 64, WHITE);
   display.display();
 
-  delay(5000);
+  delay(5000); //To Facilitiate Smooth WiFi connection and DHT22 Initialization;
 }
 
 
@@ -137,7 +140,7 @@ void loop(){
 
   unsigned long current = millis();
 
-  if(current - previous >= interval){     //2 Second, Non Blocking Function;
+  if(current - previous >= interval){  // 2 Second, Non Blocking Function;
 
     previous = current;  
     temp = dht.readTemperature();
@@ -158,7 +161,7 @@ void loop(){
 			}
 		}
 		
-		
+		//Switching In-Display Screens;
 		switch(dispcounter){
 				case 0:
 				home();
@@ -240,8 +243,8 @@ void home(){
 		display.print(" PM");
 	}
 	display.display();
-	homeantiburnin();
 
+	homeantiburnin();
 
 	lcd.clear();
 	if(displayHour<10){
@@ -270,7 +273,7 @@ void home(){
 	if(myHour >= 4 && myHour < 12){
 		lcd.print("Good Morning :)");
 	}
-	if(myHour > 12 && myHour <= 16){
+	if(myHour >= 12 && myHour <= 16){
 		lcd.print("Good Afternoon ");
 		lcd.write(byte(0));
 	}
@@ -282,7 +285,7 @@ void home(){
 void wificonnect(){
 	unsigned long a = millis();
 	Serial.println("Attempting to connect to WIFI...");
-	WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
+	WiFi.begin(WIFI_SSID,WIFI_PASSWORD); //Pulling from credentials.h
 	while(WiFi.status() != WL_CONNECTED){
 		Serial.println("Not Connected");
 		if(millis()-a >10000){
@@ -430,7 +433,7 @@ void antiburnin(){
 		
 }
 
-void homeantiburnin(){
+void homeantiburnin(){ //OLED Home screen Anti-Burnin Strategy
 		hoffsetX++;
 		hoffsetY++;
 		if(hoffsetX >= 32){hoffsetX=0;}
